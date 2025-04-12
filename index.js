@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/prueba", (req, res) => {
-  res.send("API funcionando correctamente con PERSONAS y COCHES");
+  res.send("API funcionando correctamente");
 });
 
 // ==================== FUNCIONES AUXILIARES ====================
@@ -24,10 +24,10 @@ const validarCampos = (campos, res) => {
   return true;
 };
 
-// ==================== PERSONAS ====================
+// ==================== PERSONA ====================
 app.get("/api/personas", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM persona ORDER BY id");
+    const result = await pool.query("SELECT * FROM persona");
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ message: "Error al consultar personas", error: error.message });
@@ -43,9 +43,9 @@ app.post("/api/personas", async (req, res) => {
       "INSERT INTO persona (nombre, apellido1, apellido2, dni) VALUES ($1, $2, $3, $4)",
       [nombre, apellido1, apellido2, dni]
     );
-    res.status(201).json({ message: "Persona registrada correctamente" });
+    res.status(201).json({ message: "Persona creada correctamente" });
   } catch (error) {
-    res.status(500).json({ message: "Error al registrar persona", error: error.message });
+    res.status(500).json({ message: "Error al crear persona", error: error.message });
   }
 });
 
@@ -60,8 +60,7 @@ app.put("/api/personas/:id", async (req, res) => {
       [nombre, apellido1, apellido2, dni, id]
     );
 
-    if (result.rowCount === 0)
-      return res.status(404).json({ message: "Persona no encontrada" });
+    if (result.rowCount === 0) return res.status(404).json({ message: "Persona no encontrada" });
 
     res.json({ message: "Persona actualizada correctamente" });
   } catch (error) {
@@ -75,8 +74,7 @@ app.delete("/api/personas/:id", async (req, res) => {
   try {
     const result = await pool.query("DELETE FROM persona WHERE id = $1", [id]);
 
-    if (result.rowCount === 0)
-      return res.status(404).json({ message: "Persona no encontrada" });
+    if (result.rowCount === 0) return res.status(404).json({ message: "Persona no encontrada" });
 
     res.json({ message: `Persona con ID ${id} eliminada` });
   } catch (error) {
@@ -84,10 +82,10 @@ app.delete("/api/personas/:id", async (req, res) => {
   }
 });
 
-// ==================== COCHES ====================
+// ==================== COCHE ====================
 app.get("/api/coches", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM coche ORDER BY matricula");
+    const result = await pool.query("SELECT * FROM coche");
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ message: "Error al consultar coches", error: error.message });
@@ -120,8 +118,7 @@ app.put("/api/coches/:matricula", async (req, res) => {
       [marca, modelo, caballos, persona_id, matricula]
     );
 
-    if (result.rowCount === 0)
-      return res.status(404).json({ message: "Coche no encontrado" });
+    if (result.rowCount === 0) return res.status(404).json({ message: "Coche no encontrado" });
 
     res.json({ message: "Coche actualizado correctamente" });
   } catch (error) {
@@ -135,8 +132,7 @@ app.delete("/api/coches/:matricula", async (req, res) => {
   try {
     const result = await pool.query("DELETE FROM coche WHERE matricula = $1", [matricula]);
 
-    if (result.rowCount === 0)
-      return res.status(404).json({ message: "Coche no encontrado" });
+    if (result.rowCount === 0) return res.status(404).json({ message: "Coche no encontrado" });
 
     res.json({ message: `Coche con matrícula ${matricula} eliminado` });
   } catch (error) {
@@ -144,32 +140,7 @@ app.delete("/api/coches/:matricula", async (req, res) => {
   }
 });
 
-// ==================== DETALLE COCHES CON PERSONA ====================
-app.get("/api/coches/detalles", async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT 
-        c.matricula,
-        c.marca,
-        c.modelo,
-        c.caballos,
-        p.nombre,
-        p.apellido1,
-        p.apellido2,
-        p.dni
-      FROM coche c
-      INNER JOIN persona p ON c.persona_id = p.id
-      ORDER BY c.matricula
-    `);
-    res.json(result.rows);
-  } catch (error) {
-    res.status(500).json({ message: "Error al obtener detalles de coches", error: error.message });
-  }
-});
-
 // ==================== SERVIDOR ====================
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
-
-
